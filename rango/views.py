@@ -31,7 +31,7 @@ def category( request, category_name_slug ):
 		# The .get() method returns one model instance or raises an exception.
 		category = Category.objects.get(slug=category_name_slug)
 		context_dict['category_name'] = category.name
-		context_dict['category_name_slug'] = category.category_name_slug      
+		context_dict['category_name_slug'] = category.slug
 
 		# Retrieve all of the associated pages.
 		pages = Page.objects.filter(category=category)
@@ -79,7 +79,7 @@ def add_page( request, category_name_slug ):
 		form = PageForm( request.POST )
 		if form.is_valid():
 			if cat:
-				form.save(commit=False)
+				page = form.save(commit=False)
 				page.category = cat
 				page.views = 0
 				page.save()
@@ -89,7 +89,7 @@ def add_page( request, category_name_slug ):
 	else:
 		form = PageForm()
 
-	context_dict = {'form':form, 'category':cat}
+	context_dict = {'form':form, 'category':cat ,'category_name_slug':category_name_slug}
 	return render(request, 'rango/add_page.html', context_dict)	
 
 def about( request ):
