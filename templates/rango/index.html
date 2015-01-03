@@ -8,6 +8,11 @@
 	</head>
 
 	<body>
+        {% if user.is_authenticated %}
+            <h1>Rango says... hello {{ user.username }}</h1>
+        {% else %}
+            <h1>Rango says... hello world!</h1>
+        {% endif %}
 
 		{% if categories %}
 		
@@ -28,6 +33,8 @@
 		 <strong>There are no categories.</strong><br />
 		{% endif %}
 		<a href='/rango/add_category/'>Add a new Category</a><br />
+		<a href="/rango/login/">Login</a><br />
+		<a href="/rango/register/">Click here to register</a><br />
 		<a href="/rango/about/">About</a><br />
 		<img src="{% static "images/game.jpg" %}" alt="a game?" />
 	</body>
