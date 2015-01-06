@@ -3,7 +3,7 @@
 {% block body_block %}
         {% if category %}
             <h1>Create a new page for the {{ category_name_slug }} category</h1>
-            <form id="page_form" method="POST" action="{% url 'add_page' category_name_slug ">
+            <form id="page_form" method="POST" action="{% url 'add_page' category_name_slug %}">
                 {% csrf_token %}
                 {% for hidden in form.hidden_fields %}
                     {{ hidden }}                
