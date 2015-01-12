@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from rango.models import Category, Page
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
+from datetime import datetime
 
 def index(request):
     """
@@ -20,7 +21,8 @@ def index(request):
 	# Query the database for a list of ALL categories currently stored.
 	# Order the categories by no. likes in descending order.
 	# Retrieve the top 5 only - or all if less than 5.
-	# Place the list in our context_dict dictionary which will be passed to the template.
+	# Place the list in our context_dict dictionary which will be passed to
+    # the template.
     # pylint: disable=E1103
     category_list = Category.objects.order_by('-likes')[:5]
     context_dict['categories'] = category_list
@@ -31,10 +33,33 @@ def index(request):
     context_dict['top_pages'] = top_pages
     # pylint: enable=E1103
 
-	# Return a rendered response to send to the client.
-	# We make use of the shortcut function to make our lives easier.
-	# Note that the second parameter is the template we wish to use.
-    return render(request, 'rango/index.html', context_dict)
+    # Get the number of visits to the site.
+    visits = request.session.get('visits')
+    if not visits:
+        visits = 1
+    reset_last_visit_time = False
+
+    last_visit = request.session.get('last_visit')
+    if last_visit:
+        last_visit_time = datetime.strptime(last_visit[:-7],
+                                            "%Y-%m-%d %H:%M:%S")
+
+        # has it been more than a day since the last visit?
+        if (datetime.now() - last_visit_time).seconds > 10:
+            visits += 1
+            reset_last_visit_time = True
+    else:
+        # Cookie 'last_visit' doesn't exist, so flag that it should be set.
+        reset_last_visit_time = True
+        context_dict['visits'] = visits
+
+    if reset_last_visit_time:
+        request.session['visits'] = visits
+        request.session['last_visit'] = str(datetime.now())
+
+    # Return response back to the user, updating cookies.
+    response = render(request, 'rango/index.html', context_dict)
+    return response
 
 def category(request, category_name_slug):
     """
@@ -270,4 +295,11 @@ def about(request):
     """
     Renders a page with information about the web application.
     """
-    return render(request, 'rango/about.html', {})
+    context_dict = {}
+
+    visits = request.session.get('visits')
+    if not visits:
+        visits = 1
+    context_dict['visits'] = visits
+
+    return render(request, 'rango/about.html', context_dict)
