@@ -1,0 +1,2 @@
+MAILTO=aeklant@gmail.com
+0 21 * * * python /Users/abraham/Desktop/Python_code/tango_with_django_project manage.py clearsessions >/dev/null
